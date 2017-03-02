@@ -217,6 +217,8 @@ public class TurbolinksView extends FrameLayout {
         Bitmap screenshot = getScreenshotBitmap();
         if (screenshot == null) return;
 
+        removeScreenshotView();
+
         screenshotView = new ImageView(getContext());
         screenshotView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         screenshotView.setClickable(true);
