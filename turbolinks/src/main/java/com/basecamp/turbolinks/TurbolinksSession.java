@@ -22,6 +22,7 @@ import android.webkit.WebViewClient;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>The main concrete class to use Turbolinks 5 in your app.</p>
@@ -290,6 +291,39 @@ public class TurbolinksSession implements TurbolinksScrollUpCallback {
         if (!turbolinksIsReady && !coldBootInProgress) {
             TurbolinksLog.d("Cold booting: " + location);
             webView.loadUrl(location);
+        }
+
+        // Reset so that cached snapshot is not the default for the next visit
+        restoreWithCachedSnapshot = false;
+
+        /*
+        if (!turbolinksIsReady && coldBootInProgress), we don't fire a new visit. This is
+        typically a slow connection load. This allows the previous cold boot to finish (inject TL).
+        No matter what, if new requests are sent to Turbolinks via Turbolinks.location, we'll
+        always have the last desired location. And when setTurbolinksIsReady(true) is called,
+        we open that last location.
+        */
+    }
+
+    // Supports to pass header for the coldboot visit
+    public void visit(String location, Map<String, String> httpHeaders) {
+        TurbolinksLog.d("visit called");
+
+        this.location = location;
+
+        validateRequiredParams();
+
+        if (!turbolinksIsReady || webViewAttachedToNewParent) {
+            initProgressView();
+        }
+
+        if (turbolinksIsReady) {
+            visitCurrentLocationWithTurbolinks();
+        }
+
+        if (!turbolinksIsReady && !coldBootInProgress) {
+            TurbolinksLog.d("Cold booting: " + location);
+            webView.loadUrl(location, httpHeaders);
         }
 
         // Reset so that cached snapshot is not the default for the next visit
